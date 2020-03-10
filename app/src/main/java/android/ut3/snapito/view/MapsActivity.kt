@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
 import android.ut3.snapito.R
+import android.ut3.snapito.helpers.checkIfClusterItemsAtSamePosition
 import android.ut3.snapito.model.maps.MyClusterItem
 import android.ut3.snapito.renderer.ClusteredMarkerRender
 import android.ut3.snapito.viewmodel.FirebaseStorageViewModel
@@ -64,21 +65,20 @@ class MapsActivity(
                     MyClusterItem(
                         photo.lat,
                         photo.long,
-                        photo.title,
-                        photo.author
-                    )
+                        photo.title
+                        )
                 )
             }
+            mManager.cluster();
         })
     }
 
     fun handleClusterEvents() {
         mManager.setOnClusterClickListener { cluster ->
             //check if cluster is just pictures at the same position
-            var item = cluster.items.elementAt(0)
-            if (cluster.items.filter { s -> item.position == s.position }.size == cluster.size) {
-                //TODO afficher plusieurs photos
+            if (checkIfClusterItemsAtSamePosition(cluster)) {
                 return@setOnClusterClickListener true
+                //TODO afficher plusieurs photos
             }
             var builder = LatLngBounds.builder()
             cluster.items.forEach { item ->
@@ -157,7 +157,7 @@ class MapsActivity(
     private val mLocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             var mLastLocation: Location = locationResult.lastLocation
-            var latlng: LatLng = LatLng(mLastLocation.latitude, mLastLocation.longitude)
+            var latlng = LatLng(mLastLocation.latitude, mLastLocation.longitude)
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latlng))
         }
     }
@@ -204,7 +204,7 @@ class MapsActivity(
     ) {
         if (requestCode == PERMISSION_ID) {
             if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                // Granted. Start getting the location information
+                getLastLocation()
             }
         }
     }

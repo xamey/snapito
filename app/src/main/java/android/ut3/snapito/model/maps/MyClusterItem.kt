@@ -14,6 +14,12 @@ class MyClusterItem : ClusterItem {
         mSnippet = ""
     }
 
+    constructor(lat: Double, lng: Double, title: String) {
+        mPosition = LatLng(lat, lng)
+        mTitle = title
+        mSnippet = ""
+    }
+
     constructor(lat: Double, lng: Double, title: String, snippet: String) {
         mPosition = LatLng(lat, lng)
         mTitle = title

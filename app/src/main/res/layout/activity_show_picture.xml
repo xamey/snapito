@@ -4,10 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
     tools:context=".view.ShowPictureActivity">
+
     <ImageView
         android:id="@+id/showPictureImgView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitXY" />
+        android:scaleType="fitXY"
+        android:layout_marginBottom="100dp"
+        android:layout_marginTop="100dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
