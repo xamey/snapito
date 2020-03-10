@@ -10,13 +10,13 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
-import androidx.appcompat.app.AppCompatActivity
 import android.ut3.snapito.R
 import android.ut3.snapito.model.maps.MyClusterItem
 import android.ut3.snapito.renderer.ClusteredMarkerRender
 import android.ut3.snapito.viewmodel.FirebaseStorageViewModel
 import android.ut3.snapito.viewmodel.FirestoreViewModel
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import com.google.android.gms.location.*
@@ -28,15 +28,15 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.clustering.ClusterManager
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
-
+//on injecte à la main les dépendances car c'est une classe qui n'est pas injectable par la suite
 class MapsActivity(
 
 ) : AppCompatActivity(), OnMapReadyCallback {
 
-
+    //injection de la dépendance
     private val firestoreViewModel: FirestoreViewModel by inject()
+    //injection de la dépendance
     private val firebaseStorageViewModel: FirebaseStorageViewModel by inject()
 
     private lateinit var mMap: GoogleMap
@@ -44,7 +44,6 @@ class MapsActivity(
     lateinit var mFusedLocationClient: FusedLocationProviderClient
     private lateinit var mManager: ClusterManager<MyClusterItem>
     private lateinit var clusteredMarkerRender: ClusteredMarkerRender
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,15 +59,15 @@ class MapsActivity(
     fun initMarkers() {
         firestoreViewModel.getStoredPhotos().observe(this, Observer {
             mManager.clearItems()
-            it.forEach{
-                    photo -> mManager.addItem(
-                MyClusterItem(
-                    photo.lat,
-                    photo.long,
-                    photo.title,
-                    photo.author
+            it.forEach { photo ->
+                mManager.addItem(
+                    MyClusterItem(
+                        photo.lat,
+                        photo.long,
+                        photo.title,
+                        photo.author
+                    )
                 )
-            )
             }
         })
     }
@@ -77,12 +76,12 @@ class MapsActivity(
         mManager.setOnClusterClickListener { cluster ->
             //check if cluster is just pictures at the same position
             var item = cluster.items.elementAt(0)
-            if (cluster.items.filter { s -> item.position == s.position}.size == cluster.size) {
+            if (cluster.items.filter { s -> item.position == s.position }.size == cluster.size) {
                 //TODO afficher plusieurs photos
                 return@setOnClusterClickListener true
             }
             var builder = LatLngBounds.builder()
-            cluster.items.forEach{ item ->
+            cluster.items.forEach { item ->
                 builder.include(item.position)
             }
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 100))
@@ -164,15 +163,23 @@ class MapsActivity(
     }
 
     private fun isLocationEnabled(): Boolean {
-        var locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        var locationManager: LocationManager =
+            getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
             LocationManager.NETWORK_PROVIDER
         )
     }
 
     private fun checkPermissions(): Boolean {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             return true
         }
         return false
@@ -181,20 +188,26 @@ class MapsActivity(
     private fun requestPermissions() {
         ActivityCompat.requestPermissions(
             this,
-            arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION),
+            arrayOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ),
             PERMISSION_ID
         )
     }
 
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         if (requestCode == PERMISSION_ID) {
             if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                 // Granted. Start getting the location information
             }
         }
     }
-
 
 
 }

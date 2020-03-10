@@ -11,6 +11,8 @@ import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.QuerySnapshot
 
 
+//dans la signature de la classe, on ajoute private val nomDeLaDépendance: TypeDeLaDépendance et celle-ci
+//sera ajoutée par Koin
 class FirestoreViewModel(private val firestoreRepository: FirestoreRepository): ViewModel() {
 
 
