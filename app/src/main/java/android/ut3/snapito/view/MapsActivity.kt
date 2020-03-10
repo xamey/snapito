@@ -77,8 +77,9 @@ class MapsActivity(
         mManager.setOnClusterClickListener { cluster ->
             //check if cluster is just pictures at the same position
             if (checkIfClusterItemsAtSamePosition(cluster)) {
+                firebaseStorageViewModel.listTitle = cluster.items.map {it.title}
+                startActivity(Intent(this, ShowMultiplePicturesActivity::class.java))
                 return@setOnClusterClickListener true
-                //TODO afficher plusieurs photos
             }
             var builder = LatLngBounds.builder()
             cluster.items.forEach { item ->

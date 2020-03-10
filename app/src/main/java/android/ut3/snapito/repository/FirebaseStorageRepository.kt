@@ -13,4 +13,8 @@ class FirebaseStorageRepository {
     fun getImageReference(title: String): StorageReference {
         return imagesStorage.child(title)
     }
+
+    fun getImagesReference(listTitle: List<String>): List<StorageReference> {
+        return listTitle.map { imagesStorage.child(it)}
+    }
 }

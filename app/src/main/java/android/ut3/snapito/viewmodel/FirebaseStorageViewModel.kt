@@ -9,8 +9,13 @@ import com.google.firebase.storage.StorageReference
 class FirebaseStorageViewModel(private val firebaseStorageRepository: FirebaseStorageRepository): ViewModel() {
 
     lateinit var title: String
+    lateinit var listTitle: List<String>
 
     fun getImageReference(): StorageReference {
         return firebaseStorageRepository.getImageReference(title)
+    }
+
+    fun getImagesReference(): List<StorageReference> {
+        return firebaseStorageRepository.getImagesReference(listTitle)
     }
 }
