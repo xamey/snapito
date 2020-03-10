@@ -10,12 +10,10 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.ut3.snapito.R
-import android.ut3.snapito.dagger.DaggerAppComponent
 import android.ut3.snapito.model.maps.MyClusterItem
-import android.ut3.snapito.viewmodel.ClusteredMarkerRender
+import android.ut3.snapito.renderer.ClusteredMarkerRender
 import android.ut3.snapito.viewmodel.FirebaseStorageViewModel
 import android.ut3.snapito.viewmodel.FirestoreViewModel
 import android.widget.Toast
@@ -29,12 +27,17 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.clustering.ClusterManager
-import com.google.maps.android.clustering.view.DefaultClusterRenderer
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-import kotlinx.android.synthetic.main.activity_maps.*
-import javax.inject.Inject
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity(
+
+) : AppCompatActivity(), OnMapReadyCallback {
+
+
+    private val firestoreViewModel: FirestoreViewModel by inject()
+    private val firebaseStorageViewModel: FirebaseStorageViewModel by inject()
 
     private lateinit var mMap: GoogleMap
     val PERMISSION_ID = 42
@@ -42,14 +45,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mManager: ClusterManager<MyClusterItem>
     private lateinit var clusteredMarkerRender: ClusteredMarkerRender
 
-    @Inject
-    lateinit var firestoreViewModel: FirestoreViewModel
-    @Inject
-    lateinit var firebaseStorageViewModel: FirebaseStorageViewModel
-    init {
-        DaggerAppComponent.create().injectFirestoreViewModel(this)
-        DaggerAppComponent.create().injectFirebaseStorageViewModel(this)
-    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -101,15 +96,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         setUpClusterer()
@@ -117,7 +103,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun setUpClusterer() {
         mManager = ClusterManager(this, mMap)
-        clusteredMarkerRender = ClusteredMarkerRender(this, mMap, mManager)
+        clusteredMarkerRender =
+            ClusteredMarkerRender(
+                this,
+                mMap,
+                mManager
+            )
         mManager.renderer = clusteredMarkerRender
         mMap.setOnCameraIdleListener(mManager)
         mMap.setOnMarkerClickListener(mManager)

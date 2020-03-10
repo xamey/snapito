@@ -1,4 +1,4 @@
-package android.ut3.snapito.viewmodel
+package android.ut3.snapito.renderer
 
 import android.content.Context
 import android.ut3.snapito.model.maps.MyClusterItem

@@ -1,7 +1,6 @@
 package android.ut3.snapito.viewmodel
 
 import android.content.ContentValues
-import android.ut3.snapito.dagger.DaggerAppComponent
 import android.ut3.snapito.model.firestore.StoredPhoto
 import android.ut3.snapito.repository.FirestoreRepository
 import android.util.Log
@@ -10,17 +9,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.QuerySnapshot
-import javax.inject.Inject
 
-class FirestoreViewModel @Inject constructor(): ViewModel() {
 
-    @Inject
-    lateinit var firestoreRepository: FirestoreRepository
+class FirestoreViewModel(private val firestoreRepository: FirestoreRepository): ViewModel() {
+
 
     var storedPhotos: MutableLiveData<List<StoredPhoto>> = MutableLiveData()
-    init {
-        DaggerAppComponent.create().injectFirestoreRepository(this)
-    }
 
     fun saveStoredPhoto(storedPhoto: StoredPhoto) {
         firestoreRepository.saveStoredPhoto(storedPhoto).addOnFailureListener{
