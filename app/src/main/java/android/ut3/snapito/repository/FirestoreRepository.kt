@@ -17,4 +17,8 @@ class FirestoreRepository {
     fun saveStoredPhoto(storedPhoto: StoredPhoto): Task<Void> {
         return firestoreDB.collection("images").document(storedPhoto.title).set(storedPhoto)
     }
+
+    fun getCollectionReference(): CollectionReference {
+        return firestoreDB.collection("images")
+    }
 }

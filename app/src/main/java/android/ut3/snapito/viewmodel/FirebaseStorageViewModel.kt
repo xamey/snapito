@@ -18,4 +18,5 @@ class FirebaseStorageViewModel(private val firebaseStorageRepository: FirebaseSt
     fun getImagesReference(): List<StorageReference> {
         return firebaseStorageRepository.getImagesReference(listTitle)
     }
+
 }

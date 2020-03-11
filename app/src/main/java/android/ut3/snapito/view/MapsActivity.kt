@@ -13,9 +13,11 @@ import android.provider.Settings
 import android.ut3.snapito.R
 import android.ut3.snapito.helpers.checkIfClusterItemsAtSamePosition
 import android.ut3.snapito.model.maps.MyClusterItem
+import android.ut3.snapito.notif.NotificationHelper
 import android.ut3.snapito.renderer.ClusteredMarkerRender
 import android.ut3.snapito.viewmodel.FirebaseStorageViewModel
 import android.ut3.snapito.viewmodel.FirestoreViewModel
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -27,6 +29,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.firebase.firestore.DocumentChange
 import com.google.maps.android.clustering.ClusterManager
 import org.koin.android.ext.android.inject
 
@@ -99,6 +102,26 @@ class MapsActivity(
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         setUpClusterer()
+        setUpAlert()
+    }
+
+    private fun setUpAlert() {
+        firestoreViewModel.getCollectionReference().addSnapshotListener { snapshots, e ->
+            System.out.println("cc")
+            if (e != null) {
+                return@addSnapshotListener
+            }
+
+            for (dc in snapshots!!.documentChanges) {
+                when (dc.type) {
+                    DocumentChange.Type.ADDED -> NotificationHelper.createSampleDataNotification(this@MapsActivity,
+                        "Une nouvelle photo vient d'être ajoutée!",
+                        "",
+                        "Cliques pour la découvrir.", true)
+                }
+            }
+
+        }
     }
 
     private fun setUpClusterer() {
