@@ -1,6 +1,7 @@
 package android.ut3.snapito.view
 
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -21,14 +22,22 @@ import java.io.File
 import java.io.InputStream
 import android.graphics.Bitmap
 import android.media.MediaRecorder
+import android.location.Location
+import android.location.LocationManager
 import android.os.Environment
+import android.os.Looper
+import android.provider.Settings
 import android.ut3.snapito.R
 import android.ut3.snapito.dataclasses.Sticker
+import android.ut3.snapito.model.photos.TakenPhoto
 import android.ut3.snapito.viewmodel.FirebaseStorageViewModel
 import android.ut3.snapito.viewmodel.FirestoreViewModel
 import android.util.Log
 import android.widget.Toast
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.net.toUri
+import com.google.android.gms.location.*
+import com.google.android.gms.maps.model.LatLng
 import org.koin.android.ext.android.inject
 import java.io.FileOutputStream
 import java.io.IOException
@@ -71,6 +80,9 @@ class CanvasActivity : Activity(), SensorEventListener {
 
     private lateinit var galleryFolder: File;
 
+    lateinit var mFusedLocationClient: FusedLocationProviderClient
+    var currentLatLng : LatLng = LatLng(43.560811, 1.469408)
+
     enum class FilterType {
         NORMAL,
         BLACK_AND_WHITE,
@@ -83,6 +95,11 @@ class CanvasActivity : Activity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_canvas)
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        getLastLocation()
+
+
         imageView = findViewById(R.id.imageView)
         paint.setColor(Color.BLACK)
         paint.strokeWidth = 10f
@@ -195,6 +212,56 @@ class CanvasActivity : Activity(), SensorEventListener {
         }
 
         return true;
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getLastLocation() {
+        if (isLocationEnabled()) {
+            mFusedLocationClient.lastLocation.addOnCompleteListener(this) { task ->
+                var location: Location? = task.result
+                if (location == null) {
+                    requestNewLocationData()
+                } else {
+                    currentLatLng = LatLng(location.latitude, location.longitude)
+                }
+            }
+        } else {
+            Toast.makeText(this, "Veuillez activer la localisation", Toast.LENGTH_LONG).show()
+            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            startActivity(intent)
+        }
+
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun requestNewLocationData() {
+        var mLocationRequest = LocationRequest()
+        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        mLocationRequest.interval = 0
+        mLocationRequest.fastestInterval = 0
+        mLocationRequest.numUpdates = 1
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        mFusedLocationClient!!.requestLocationUpdates(
+            mLocationRequest, mLocationCallback,
+            Looper.myLooper()
+        )
+    }
+
+    private val mLocationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult) {
+            var mLastLocation: Location = locationResult.lastLocation
+            currentLatLng = LatLng(mLastLocation.latitude, mLastLocation.longitude)
+
+        }
+    }
+
+    private fun isLocationEnabled(): Boolean {
+        var locationManager: LocationManager =
+            getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+            LocationManager.NETWORK_PROVIDER
+        )
     }
 
 
@@ -405,15 +472,18 @@ class CanvasActivity : Activity(), SensorEventListener {
     }
 
     fun sendPicture() {
-        println("send ?")
         var outputPhoto: FileOutputStream? = null;
         try {
             createImageGallery();
             val imageFile = createImageFile(galleryFolder);
             outputPhoto = FileOutputStream(imageFile);
             imageView?.drawable?.toBitmap()?.compress(Bitmap.CompressFormat.JPEG, 70, outputPhoto);
-
-            println(" ==> " + galleryFolder.absolutePath)
+            //var takenPhoto = TakenPhoto(imageFile.toUri())
+            // println(" ==> " + galleryFolder.absolutePath)
+            var takenPhoto = TakenPhoto(imageFile.toUri(), currentLatLng.latitude, currentLatLng.longitude)
+            firestoreViewModel.saveTakenPhoto(takenPhoto)
+            firebaseStorageViewModel.saveImage(takenPhoto)
+            startActivity(Intent(this, MapsActivity::class.java))
         } catch (e: Exception) {
             e.printStackTrace();
         } finally {

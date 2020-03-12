@@ -18,7 +18,7 @@ class FirestoreViewModel(private val firestoreRepository: FirestoreRepository): 
 
     var storedPhotos: MutableLiveData<List<StoredPhoto>> = MutableLiveData()
 
-    fun saveStoredPhoto(takenPhoto: TakenPhoto) {
+    fun saveTakenPhoto(takenPhoto: TakenPhoto) {
         firestoreRepository.saveStoredPhoto(takenPhoto).addOnFailureListener{
             Log.e(ContentValues.TAG, "Failed to save photo")
         }
