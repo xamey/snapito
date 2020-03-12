@@ -29,8 +29,10 @@ class ClusteredMarkerRender(context: Context, map: GoogleMap, clusterManager: Cl
             drawable!!.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
             var bitmap: Bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
             var canvas = Canvas(bitmap)
+
             drawable.draw(canvas)
             markerOptions!!.icon(BitmapDescriptorFactory.fromBitmap(bitmap))
+
         }
     }
 

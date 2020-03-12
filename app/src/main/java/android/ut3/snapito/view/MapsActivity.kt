@@ -17,7 +17,8 @@ import android.ut3.snapito.notif.NotificationHelper
 import android.ut3.snapito.renderer.ClusteredMarkerRender
 import android.ut3.snapito.viewmodel.FirebaseStorageViewModel
 import android.ut3.snapito.viewmodel.FirestoreViewModel
-import android.util.Log
+import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -29,36 +30,42 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.DocumentChange
 import com.google.maps.android.clustering.ClusterManager
 import org.koin.android.ext.android.inject
 
-//on injecte à la main les dépendances car c'est une classe qui n'est pas injectable par la suite
 class MapsActivity(
 
 ) : AppCompatActivity(), OnMapReadyCallback {
 
-    //injection de la dépendance
     private val firestoreViewModel: FirestoreViewModel by inject()
-    //injection de la dépendance
     private val firebaseStorageViewModel: FirebaseStorageViewModel by inject()
 
     private lateinit var mMap: GoogleMap
-    val PERMISSION_ID = 42
     lateinit var mFusedLocationClient: FusedLocationProviderClient
     private lateinit var mManager: ClusterManager<MyClusterItem>
     private lateinit var clusteredMarkerRender: ClusteredMarkerRender
+
+    val PERMISSION_ID = 42
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
+
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
+
+        val fab: FloatingActionButton = findViewById(R.id.fab)
+        fab.setOnClickListener {
+            startActivity(Intent(this, MapsActivity::class.java))
+        }
         mapFragment.getMapAsync(this)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         getLastLocation()
     }
+
 
     fun initMarkers() {
         firestoreViewModel.getStoredPhotos().observe(this, Observer {
@@ -69,7 +76,7 @@ class MapsActivity(
                         photo.lat,
                         photo.long,
                         photo.title
-                        )
+                    )
                 )
             }
             mManager.cluster();
@@ -80,7 +87,7 @@ class MapsActivity(
         mManager.setOnClusterClickListener { cluster ->
             //check if cluster is just pictures at the same position
             if (checkIfClusterItemsAtSamePosition(cluster)) {
-                firebaseStorageViewModel.listTitle = cluster.items.map {it.title}
+                firebaseStorageViewModel.listTitle = cluster.items.map { it.title }
                 startActivity(Intent(this, ShowMultiplePicturesActivity::class.java))
                 return@setOnClusterClickListener true
             }
@@ -103,7 +110,9 @@ class MapsActivity(
         mMap = googleMap
         setUpClusterer()
         setUpAlert()
+
     }
+
 
     private fun setUpAlert() {
         firestoreViewModel.getCollectionReference().addSnapshotListener { snapshots, e ->
@@ -114,10 +123,12 @@ class MapsActivity(
 
             for (dc in snapshots!!.documentChanges) {
                 when (dc.type) {
-                    DocumentChange.Type.ADDED -> NotificationHelper.createSampleDataNotification(this@MapsActivity,
+                    DocumentChange.Type.ADDED -> NotificationHelper.createSampleDataNotification(
+                        this@MapsActivity,
                         "Une nouvelle photo vient d'être ajoutée!",
                         "",
-                        "Cliques pour la découvrir.", true)
+                        "Cliques pour la découvrir.", true
+                    )
                 }
             }
 
@@ -141,26 +152,23 @@ class MapsActivity(
 
     @SuppressLint("MissingPermission")
     private fun getLastLocation() {
-        if (checkPermissions()) {
-            if (isLocationEnabled()) {
-                mFusedLocationClient.lastLocation.addOnCompleteListener(this) { task ->
-                    var location: Location? = task.result
-                    if (location == null) {
-                        requestNewLocationData()
-                    } else {
-                        var latlng: LatLng = LatLng(location.latitude, location.longitude)
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 12f))
+        if (isLocationEnabled()) {
+            mFusedLocationClient.lastLocation.addOnCompleteListener(this) { task ->
+                var location: Location? = task.result
+                if (location == null) {
+                    requestNewLocationData()
+                } else {
+                    var latlng: LatLng = LatLng(location.latitude, location.longitude)
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 12f))
 
-                    }
                 }
-            } else {
-                Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show()
-                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                startActivity(intent)
             }
         } else {
-            requestPermissions()
+            Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show()
+            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            startActivity(intent)
         }
+
     }
 
     @SuppressLint("MissingPermission")
@@ -191,32 +199,6 @@ class MapsActivity(
             getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
             LocationManager.NETWORK_PROVIDER
-        )
-    }
-
-    private fun checkPermissions(): Boolean {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            return true
-        }
-        return false
-    }
-
-    private fun requestPermissions() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ),
-            PERMISSION_ID
         )
     }
 
