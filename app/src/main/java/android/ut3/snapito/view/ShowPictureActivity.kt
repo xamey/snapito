@@ -10,11 +10,9 @@ import com.bumptech.glide.Glide
 import com.firebase.ui.storage.images.FirebaseImageLoader
 import org.koin.android.ext.android.inject
 
-//on injecte à la main les dépendances car c'est une classe qui n'est pas injectable par la suite
 class ShowPictureActivity(
 ) : AppCompatActivity() {
 
-    //injection de la dépendance
     private val firebaseStorageViewModel: FirebaseStorageViewModel by inject()
 
 

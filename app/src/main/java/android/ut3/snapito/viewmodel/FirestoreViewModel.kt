@@ -2,6 +2,7 @@ package android.ut3.snapito.viewmodel
 
 import android.content.ContentValues
 import android.ut3.snapito.model.firestore.StoredPhoto
+import android.ut3.snapito.model.photos.TakenPhoto
 import android.ut3.snapito.repository.FirestoreRepository
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -11,15 +12,13 @@ import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.QuerySnapshot
 
 
-//dans la signature de la classe, on ajoute private val nomDeLaDépendance: TypeDeLaDépendance et celle-ci
-//sera ajoutée par Koin
 class FirestoreViewModel(private val firestoreRepository: FirestoreRepository): ViewModel() {
 
 
     var storedPhotos: MutableLiveData<List<StoredPhoto>> = MutableLiveData()
 
-    fun saveStoredPhoto(storedPhoto: StoredPhoto) {
-        firestoreRepository.saveStoredPhoto(storedPhoto).addOnFailureListener{
+    fun saveStoredPhoto(takenPhoto: TakenPhoto) {
+        firestoreRepository.saveStoredPhoto(takenPhoto).addOnFailureListener{
             Log.e(ContentValues.TAG, "Failed to save photo")
         }
     }

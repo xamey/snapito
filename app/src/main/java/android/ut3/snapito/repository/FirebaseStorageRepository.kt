@@ -1,10 +1,10 @@
 package android.ut3.snapito.repository
 
+import android.ut3.snapito.model.photos.TakenPhoto
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
-
-//rien à faire vu que y'a pas de dépendance
+import java.io.File
 
 class FirebaseStorageRepository {
 
@@ -16,5 +16,10 @@ class FirebaseStorageRepository {
 
     fun getImagesReference(listTitle: List<String>): List<StorageReference> {
         return listTitle.map { imagesStorage.child(it)}
+    }
+
+    fun saveImage(takenPhoto: TakenPhoto) {
+        val newImageStorage = imagesStorage.child(takenPhoto.uri.lastPathSegment)
+        newImageStorage.putFile(takenPhoto.uri)
     }
 }

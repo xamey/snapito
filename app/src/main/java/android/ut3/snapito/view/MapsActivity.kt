@@ -30,14 +30,11 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.clustering.ClusterManager
 import org.koin.android.ext.android.inject
 
-//on injecte à la main les dépendances car c'est une classe qui n'est pas injectable par la suite
 class MapsActivity(
 
 ) : AppCompatActivity(), OnMapReadyCallback {
 
-    //injection de la dépendance
     private val firestoreViewModel: FirestoreViewModel by inject()
-    //injection de la dépendance
     private val firebaseStorageViewModel: FirebaseStorageViewModel by inject()
 
     private lateinit var mMap: GoogleMap

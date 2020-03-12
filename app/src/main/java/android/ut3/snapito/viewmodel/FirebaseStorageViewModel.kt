@@ -1,11 +1,10 @@
 package android.ut3.snapito.viewmodel
 
+import android.ut3.snapito.model.photos.TakenPhoto
 import android.ut3.snapito.repository.FirebaseStorageRepository
 import androidx.lifecycle.ViewModel
 import com.google.firebase.storage.StorageReference
 
-//dans la signature de la classe, on ajoute private val nomDeLaDépendance: TypeDeLaDépendance et celle-ci
-//sera ajoutée par Koin
 class FirebaseStorageViewModel(private val firebaseStorageRepository: FirebaseStorageRepository): ViewModel() {
 
     lateinit var title: String
@@ -17,5 +16,9 @@ class FirebaseStorageViewModel(private val firebaseStorageRepository: FirebaseSt
 
     fun getImagesReference(): List<StorageReference> {
         return firebaseStorageRepository.getImagesReference(listTitle)
+    }
+
+    fun saveImage(takenPhoto: TakenPhoto) {
+        return firebaseStorageRepository.saveImage(takenPhoto)
     }
 }
