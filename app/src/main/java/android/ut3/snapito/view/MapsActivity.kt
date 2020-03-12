@@ -13,6 +13,7 @@ import android.provider.Settings
 import android.ut3.snapito.R
 import android.ut3.snapito.helpers.checkIfClusterItemsAtSamePosition
 import android.ut3.snapito.model.maps.MyClusterItem
+import android.ut3.snapito.notif.NotificationHelper
 import android.ut3.snapito.renderer.ClusteredMarkerRender
 import android.ut3.snapito.viewmodel.FirebaseStorageViewModel
 import android.ut3.snapito.viewmodel.FirestoreViewModel
@@ -30,6 +31,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.firestore.DocumentChange
 import com.google.maps.android.clustering.ClusterManager
 import org.koin.android.ext.android.inject
 
@@ -65,7 +67,6 @@ class MapsActivity(
     }
 
 
-
     fun initMarkers() {
         firestoreViewModel.getStoredPhotos().observe(this, Observer {
             mManager.clearItems()
@@ -75,7 +76,7 @@ class MapsActivity(
                         photo.lat,
                         photo.long,
                         photo.title
-                        )
+                    )
                 )
             }
             mManager.cluster();
@@ -86,7 +87,7 @@ class MapsActivity(
         mManager.setOnClusterClickListener { cluster ->
             //check if cluster is just pictures at the same position
             if (checkIfClusterItemsAtSamePosition(cluster)) {
-                firebaseStorageViewModel.listTitle = cluster.items.map {it.title}
+                firebaseStorageViewModel.listTitle = cluster.items.map { it.title }
                 startActivity(Intent(this, ShowMultiplePicturesActivity::class.java))
                 return@setOnClusterClickListener true
             }
@@ -108,6 +109,30 @@ class MapsActivity(
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         setUpClusterer()
+        setUpAlert()
+
+    }
+
+
+    private fun setUpAlert() {
+        firestoreViewModel.getCollectionReference().addSnapshotListener { snapshots, e ->
+            System.out.println("cc")
+            if (e != null) {
+                return@addSnapshotListener
+            }
+
+            for (dc in snapshots!!.documentChanges) {
+                when (dc.type) {
+                    DocumentChange.Type.ADDED -> NotificationHelper.createSampleDataNotification(
+                        this@MapsActivity,
+                        "Une nouvelle photo vient d'être ajoutée!",
+                        "",
+                        "Cliques pour la découvrir.", true
+                    )
+                }
+            }
+
+        }
     }
 
     private fun setUpClusterer() {
@@ -127,22 +152,22 @@ class MapsActivity(
 
     @SuppressLint("MissingPermission")
     private fun getLastLocation() {
-            if (isLocationEnabled()) {
-                mFusedLocationClient.lastLocation.addOnCompleteListener(this) { task ->
-                    var location: Location? = task.result
-                    if (location == null) {
-                        requestNewLocationData()
-                    } else {
-                        var latlng: LatLng = LatLng(location.latitude, location.longitude)
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 12f))
+        if (isLocationEnabled()) {
+            mFusedLocationClient.lastLocation.addOnCompleteListener(this) { task ->
+                var location: Location? = task.result
+                if (location == null) {
+                    requestNewLocationData()
+                } else {
+                    var latlng: LatLng = LatLng(location.latitude, location.longitude)
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 12f))
 
-                    }
                 }
-            } else {
-                Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show()
-                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                startActivity(intent)
             }
+        } else {
+            Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show()
+            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            startActivity(intent)
+        }
 
     }
 
@@ -176,9 +201,6 @@ class MapsActivity(
             LocationManager.NETWORK_PROVIDER
         )
     }
-
-
-
 
 
     override fun onRequestPermissionsResult(

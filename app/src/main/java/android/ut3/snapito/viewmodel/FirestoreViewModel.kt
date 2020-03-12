@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.QuerySnapshot
 
@@ -39,4 +40,9 @@ class FirestoreViewModel(private val firestoreRepository: FirestoreRepository): 
         })
         return storedPhotos
     }
+
+    fun getCollectionReference(): CollectionReference {
+        return firestoreRepository.getCollectionReference()
+    }
+
 }

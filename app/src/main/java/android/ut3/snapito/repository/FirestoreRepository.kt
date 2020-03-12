@@ -15,8 +15,12 @@ class FirestoreRepository {
     }
 
     fun saveStoredPhoto(takenPhoto: TakenPhoto): Task<Void> {
-        val title = takenPhoto.uri.lastPathSegment
+        val title = takenPhoto.uri.lastPathSegment!!
         val storedPhoto = StoredPhoto(title, takenPhoto.lat, takenPhoto.long)
-        return firestoreDB.collection("images").document(title).set(storedPhoto)
+        return firestoreDB.collection("images").document(title!!).set(storedPhoto)
+    }
+
+    fun getCollectionReference(): CollectionReference {
+        return firestoreDB.collection("images")
     }
 }

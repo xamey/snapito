@@ -19,7 +19,7 @@ class FirebaseStorageRepository {
     }
 
     fun saveImage(takenPhoto: TakenPhoto) {
-        val newImageStorage = imagesStorage.child(takenPhoto.uri.lastPathSegment)
+        val newImageStorage = imagesStorage.child(takenPhoto.uri.lastPathSegment!!)
         newImageStorage.putFile(takenPhoto.uri)
     }
 }
