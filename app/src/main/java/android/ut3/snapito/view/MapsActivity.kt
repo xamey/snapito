@@ -1,6 +1,5 @@
 package android.ut3.snapito.view
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -17,11 +16,8 @@ import android.ut3.snapito.notif.NotificationHelper
 import android.ut3.snapito.renderer.ClusteredMarkerRender
 import android.ut3.snapito.viewmodel.FirebaseStorageViewModel
 import android.ut3.snapito.viewmodel.FirestoreViewModel
-import android.view.View
-import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -164,7 +160,7 @@ class MapsActivity(
                 }
             }
         } else {
-            Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Veuillez activer la localisation", Toast.LENGTH_LONG).show()
             val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
             startActivity(intent)
         }
