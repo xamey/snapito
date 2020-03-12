@@ -20,12 +20,20 @@ import com.flask.colorpicker.builder.ColorPickerDialogBuilder
 import java.io.File
 import java.io.InputStream
 import android.graphics.Bitmap
+import android.os.Environment
 import android.ut3.snapito.R
 import android.ut3.snapito.dataclasses.Sticker
 import android.ut3.snapito.viewmodel.FirebaseStorageViewModel
 import android.ut3.snapito.viewmodel.FirestoreViewModel
+import android.util.Log
 import android.widget.Toast
+import androidx.core.graphics.drawable.toBitmap
 import org.koin.android.ext.android.inject
+import java.io.FileOutputStream
+import java.io.IOException
+import java.lang.Exception
+import java.util.*
+import kotlin.collections.ArrayList
 
 class CanvasActivity : Activity(), SensorEventListener {
 
@@ -58,6 +66,9 @@ class CanvasActivity : Activity(), SensorEventListener {
     private lateinit var btnEmojiNerd: ImageButton;
     private lateinit var btnEmojiLove: ImageButton;
     private lateinit var btnEmojiDead: ImageButton;
+    private lateinit var btnSend: ImageView;
+
+    private lateinit var galleryFolder: File;
 
     enum class FilterType {
         NORMAL,
@@ -77,6 +88,7 @@ class CanvasActivity : Activity(), SensorEventListener {
         btnChooseImage = findViewById(R.id.btnLoad)
         btnChooseColor = findViewById(R.id.btnColor)
         btnEmojiHappy = findViewById(R.id.btnHappy);
+        btnSend = findViewById(R.id.btnSend);
         btnEmojiHappy.setOnClickListener { v -> onBtnEmojiClick() }
         btnEmojiLove = findViewById(R.id.btnLove);
         btnEmojiLove.setOnClickListener { v -> onBtnEmojiLoveClick() }
@@ -84,6 +96,8 @@ class CanvasActivity : Activity(), SensorEventListener {
         btnEmojiNerd.setOnClickListener { v -> onBtnEmojiNerdClick() }
         btnEmojiDead = findViewById(R.id.btnDead);
         btnEmojiDead.setOnClickListener { v -> onBtnEmojiDeadClick() }
+
+        btnSend.setOnClickListener{ v -> sendPicture() }
 
         imageView.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(v: View, event: MotionEvent?): Boolean {
@@ -375,6 +389,43 @@ class CanvasActivity : Activity(), SensorEventListener {
                 last_z = z
             }
             busy = false
+        }
+    }
+
+    fun createImageGallery() {
+        val storageDirectory: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        galleryFolder = File(storageDirectory, resources.getString(R.string.app_name));
+        if (!galleryFolder.exists()) {
+            val wasCreated: Boolean = galleryFolder.mkdirs();
+            if (!wasCreated) {
+                Log.e("CapturedImages", "Failed to create directory");
+            }
+        }
+    }
+
+    fun createImageFile(galleryFolder: File): File {
+        val timeStamp = Date().toString();
+        return File.createTempFile(timeStamp, ".jpg", galleryFolder);
+    }
+
+    fun sendPicture() {
+        println("send ?")
+        var outputPhoto: FileOutputStream? = null;
+        try {
+            createImageGallery();
+            val imageFile = createImageFile(galleryFolder);
+            outputPhoto = FileOutputStream(imageFile);
+            imageView?.drawable?.toBitmap()?.compress(Bitmap.CompressFormat.JPEG, 70, outputPhoto);
+
+            println(" ==> " + galleryFolder.absolutePath)
+        } catch (e: Exception) {
+            e.printStackTrace();
+        } finally {
+            try {
+                outputPhoto?.close();
+            } catch (e: IOException) {
+                e.printStackTrace();
+            }
         }
     }
 
