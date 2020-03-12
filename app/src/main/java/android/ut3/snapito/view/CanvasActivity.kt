@@ -20,6 +20,7 @@ import com.flask.colorpicker.builder.ColorPickerDialogBuilder
 import java.io.File
 import java.io.InputStream
 import android.graphics.Bitmap
+import android.media.MediaRecorder
 import android.os.Environment
 import android.ut3.snapito.R
 import android.ut3.snapito.dataclasses.Sticker
@@ -58,8 +59,6 @@ class CanvasActivity : Activity(), SensorEventListener {
     private var originalFilterImageInverted: Bitmap? = null;
     private var busy: Boolean = false;
 
-    private var oldX: Float = -1f;
-    private var oldY: Float = -1f;
     private var stickers: MutableList<Sticker> = ArrayList();
 
     private lateinit var btnEmojiHappy: ImageButton;
@@ -67,6 +66,8 @@ class CanvasActivity : Activity(), SensorEventListener {
     private lateinit var btnEmojiLove: ImageButton;
     private lateinit var btnEmojiDead: ImageButton;
     private lateinit var btnSend: ImageView;
+
+    private var mRecorder = MediaRecorder()
 
     private lateinit var galleryFolder: File;
 
@@ -105,15 +106,12 @@ class CanvasActivity : Activity(), SensorEventListener {
                     initCanvas(v);
                 }
                 when (event?.action) {
-                    MotionEvent.ACTION_DOWN -> if (noneEmojiSelected(event)) startLine(v, event);
-                    MotionEvent.ACTION_MOVE ->{
-                        if (noneEmojiSelected(event)) { // TODO
-                            drawLine(v, event)
-                        } else {
+                    MotionEvent.ACTION_DOWN -> if (noneEmojiSelected(event)) drawDot(event)
+                    MotionEvent.ACTION_MOVE -> {
+                        if (!noneEmojiSelected((event))) {
                             drawStickers(event);
                         }
                     }
-                    MotionEvent.ACTION_UP -> if (noneEmojiSelected(event)) endLine(v, event)
                 }
                 return true // v?.onTouchEvent(event) ?: true
             }
@@ -133,6 +131,12 @@ class CanvasActivity : Activity(), SensorEventListener {
             mSensorMgr.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
             SensorManager.SENSOR_DELAY_FASTEST
         );
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        mRecorder.setOutputFile("/dev/null");
+        mRecorder.prepare();
+        mRecorder.start();
     }
 
     fun drawStickers(event: MotionEvent?) {
@@ -245,23 +249,15 @@ class CanvasActivity : Activity(), SensorEventListener {
     }
 
 
-    private fun startLine(view: View, event: MotionEvent) {
-        oldX = event.x;
-        oldY = event.y;
-    }
-
-    private fun drawLine(view: View, event: MotionEvent) {
-        canvas.drawLine(oldX, oldY, event.x, event.y, paint);
-        oldX = event.x;
-        oldY = event.y;
-        view.invalidate()
-    }
-
-    private fun endLine(view: View, event: MotionEvent) {
-        canvas.drawLine(oldX, oldY, event.x, event.y, paint);
-        oldX = -1f
-        oldY = -1f
-        view.invalidate()
+    private fun drawDot(event: MotionEvent) {
+        var radius = 10f;
+        if (mRecorder != null) {
+            radius = mRecorder.maxAmplitude / 200f
+        }
+        if (radius < 10) radius = 10f
+        if (radius > 100) radius = 100f
+        canvas.drawCircle(event.x, event.y, radius, paint);
+        imageView.invalidate()
     }
 
     private fun initCanvas(view: View) {
@@ -427,6 +423,11 @@ class CanvasActivity : Activity(), SensorEventListener {
                 e.printStackTrace();
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mRecorder.stop()
     }
 
 }

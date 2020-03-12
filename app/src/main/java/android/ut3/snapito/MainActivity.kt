@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity()  {
         ActivityCompat.requestPermissions(
             this,
             arrayOf(
+                Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.INTERNET,
@@ -64,6 +65,10 @@ class MainActivity : AppCompatActivity()  {
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.RECORD_AUDIO
             ) == PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(
                 this,
