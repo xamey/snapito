@@ -1,4 +1,4 @@
-package android.ut3.snapito
+package android.ut3.snapito.view
 
 
 import android.app.Activity
@@ -20,10 +20,17 @@ import com.flask.colorpicker.builder.ColorPickerDialogBuilder
 import java.io.File
 import java.io.InputStream
 import android.graphics.Bitmap
+import android.ut3.snapito.R
 import android.ut3.snapito.dataclasses.Sticker
+import android.ut3.snapito.viewmodel.FirebaseStorageViewModel
+import android.ut3.snapito.viewmodel.FirestoreViewModel
 import android.widget.Toast
+import org.koin.android.ext.android.inject
 
 class CanvasActivity : Activity(), SensorEventListener {
+
+    private val firestoreViewModel: FirestoreViewModel by inject()
+    private val firebaseStorageViewModel: FirebaseStorageViewModel by inject()
 
     private var last_x: Float = 0f
     private var last_y: Float = 0f
@@ -58,7 +65,8 @@ class CanvasActivity : Activity(), SensorEventListener {
         INVERTED
     }
 
-    private var currentFilter: FilterType = FilterType.NORMAL
+    private var currentFilter: FilterType =
+        FilterType.NORMAL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

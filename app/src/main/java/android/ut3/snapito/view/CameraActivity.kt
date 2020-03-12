@@ -1,4 +1,4 @@
-package android.ut3.snapito
+package android.ut3.snapito.view
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Camera
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
@@ -16,7 +15,6 @@ import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CaptureRequest
-import android.hardware.camera2.params.StreamConfigurationMap
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
@@ -27,15 +25,12 @@ import android.util.Size
 import android.view.Surface
 import android.view.TextureView
 import android.view.Window
-import android.widget.Button
 import android.widget.ImageButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.lang.Exception
-import java.text.SimpleDateFormat
 import java.util.*
 
 

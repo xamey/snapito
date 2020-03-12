@@ -9,7 +9,6 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
-import android.ut3.snapito.CameraActivity
 import android.ut3.snapito.R
 import android.ut3.snapito.helpers.checkIfClusterItemsAtSamePosition
 import android.ut3.snapito.model.maps.MyClusterItem
